@@ -4,6 +4,7 @@ namespace LeafAPI\Foundation;
 
 
 use LeafAPI\Container\Container;
+use LeafAPI\Foundation\Kernel;
 
 
 class Application extends Container
@@ -41,6 +42,11 @@ class Application extends Container
             Application::class,
             fn() => $this
         );
+
+         $this->singleton(
+        Kernel::class,
+        fn()=> new Kernel($this)
+    );
 
     }
 
