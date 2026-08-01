@@ -4,61 +4,186 @@ namespace LeafAPI\Foundation;
 
 
 use LeafAPI\Container\Container;
-use LeafAPI\Foundation\Kernel;
+
+use LeafAPI\Routing\Router;
+use LeafAPI\Routing\RouteCollection;
+use LeafAPI\Routing\RouteFacade;
+use LeafAPI\Routing\Dispatcher;
+
+use LeafAPI\Middleware\Pipeline;
+
 
 
 class Application extends Container
 {
 
-    /**
-     * Framework version
-     */
+
     protected string $version = '0.1.0';
 
 
-    /**
-     * Application instance
-     */
     protected static ?Application $instance = null;
 
 
 
     public function __construct()
     {
+
         self::$instance = $this;
 
         $this->registerBaseBindings();
+
     }
 
 
 
-    /**
-     * Register core services
-     */
+
     protected function registerBaseBindings(): void
     {
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Application
+        |--------------------------------------------------------------------------
+        */
 
         $this->singleton(
             Application::class,
             fn() => $this
         );
 
-         $this->singleton(
-        Kernel::class,
-        fn()=> new Kernel($this)
-    );
+
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Route Collection
+        |--------------------------------------------------------------------------
+        */
+
+        $this->singleton(
+            RouteCollection::class,
+            fn() => new RouteCollection()
+        );
+
+
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Dispatcher
+        |--------------------------------------------------------------------------
+        */
+
+        $this->singleton(
+            Dispatcher::class,
+
+            function($app){
+
+                return new Dispatcher(
+                    $app
+                );
+
+            }
+
+        );
+
+
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Router
+        |--------------------------------------------------------------------------
+        */
+
+        $this->singleton(
+            Router::class,
+
+            function($app){
+
+                return new Router(
+
+                    $app->make(
+                        RouteCollection::class
+                    ),
+
+                    $app->make(
+                        Dispatcher::class
+                    )
+
+                );
+
+            }
+
+        );
+
+
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Route Facade
+        |--------------------------------------------------------------------------
+        */
+
+        RouteFacade::setRouter(
+
+            $this->make(
+                Router::class
+            )
+
+        );
+
+
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Middleware Pipeline
+        |--------------------------------------------------------------------------
+        */
+
+        $this->singleton(
+            Pipeline::class,
+
+            fn() => new Pipeline()
+
+        );
+
+
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Kernel
+        |--------------------------------------------------------------------------
+        */
+
+        $this->singleton(
+            Kernel::class,
+
+            function($app){
+
+                return new Kernel(
+                    $app
+                );
+
+            }
+
+        );
+
 
     }
 
 
 
-    /**
-     * Get application instance
-     */
+
     public static function getInstance(): ?Application
     {
         return self::$instance;
     }
+
 
 
 

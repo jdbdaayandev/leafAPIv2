@@ -1,24 +1,13 @@
 <?php
 
+use LeafAPI\Http\ResponseFactory;
 
-use LeafAPI\Http\JsonResponse;
 
+if (!function_exists('response')) {
 
-function response(): object
-{
-    return new class {
+    function response(): ResponseFactory
+    {
+        return new ResponseFactory();
+    }
 
-        public function json(
-            array $data,
-            int $status=200
-        ){
-
-            return new JsonResponse(
-                $data,
-                $status
-            );
-
-        }
-
-    };
 }

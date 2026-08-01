@@ -3,8 +3,14 @@
 namespace LeafAPI\Foundation;
 
 
-use LeafAPI\Http\Request;
-use LeafAPI\Http\Response;
+use LeafAPI\Middleware\Pipeline;
+use LeafAPI\Middleware\RouteHandler;
+use LeafAPI\Routing\Router;
+
+
+use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Message\ResponseInterface;
+
 
 
 class Kernel
@@ -17,7 +23,9 @@ class Kernel
 
 
 
-    public function __construct(Application $app)
+    public function __construct(
+        Application $app
+    )
     {
         $this->app = $app;
     }
@@ -25,20 +33,79 @@ class Kernel
 
 
     /**
-     * Handle incoming request
+     * Handle incoming HTTP request
      */
-    public function handle(Request $request): Response
+    public function handle(
+        ServerRequestInterface $request
+    ): ResponseInterface
     {
 
-        /**
-         * Temporary response
-         * Router will replace this later
-         */
-        return new Response(
-            "LeafAPI Kernel Running"
+
+        $router =
+            $this->app->make(
+                Router::class
+            );
+
+
+
+        $pipeline =
+            new Pipeline();
+
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Register Middleware
+        |--------------------------------------------------------------------------
+        */
+
+        foreach($this->middleware as $middleware)
+        {
+
+            $pipeline->add(
+                new $middleware()
+            );
+
+        }
+
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Final Request Handler
+        |--------------------------------------------------------------------------
+        */
+
+        $pipeline->setDestination(
+
+            new RouteHandler(
+
+                function(
+                    ServerRequestInterface $request
+                ) use ($router)
+                {
+
+
+                    return $router->dispatch(
+                        $request
+                    );
+
+
+                }
+
+            )
+
         );
 
+
+
+        return $pipeline->handle(
+            $request
+        );
+
+
     }
+
 
 
 
@@ -49,8 +116,11 @@ class Kernel
         string $middleware
     ): void
     {
+
         $this->middleware[] = $middleware;
+
     }
+
 
 
 

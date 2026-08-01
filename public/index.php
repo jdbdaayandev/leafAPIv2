@@ -3,18 +3,63 @@
 require __DIR__.'/../vendor/autoload.php';
 
 
-$app = require __DIR__.'/../bootstrap/app.php';
+use LeafAPI\Foundation\Application;
+use LeafAPI\Http\Psr7\ServerRequest;
 
 
-$request = new LeafAPI\Http\Request();
 
+/*
+|--------------------------------------------------------------------------
+| Create Application
+|--------------------------------------------------------------------------
+*/
+
+$app = new Application();
+
+
+
+/*
+|--------------------------------------------------------------------------
+| Load Routes
+|--------------------------------------------------------------------------
+*/
+
+require __DIR__.'/../routes/api.php';
+
+
+
+/*
+|--------------------------------------------------------------------------
+| Create Request
+|--------------------------------------------------------------------------
+*/
+
+$request = new ServerRequest();
+
+
+
+/*
+|--------------------------------------------------------------------------
+| Handle Request
+|--------------------------------------------------------------------------
+*/
 
 $kernel = $app->make(
-    LeafAPI\Foundation\Kernel::class
+    \LeafAPI\Foundation\Kernel::class
 );
 
 
-$response = $kernel->handle($request);
+
+$response = $kernel->handle(
+    $request
+);
 
 
-$response->send();
+
+/*
+|--------------------------------------------------------------------------
+| Send Response
+|--------------------------------------------------------------------------
+*/
+
+echo $response->getBody();

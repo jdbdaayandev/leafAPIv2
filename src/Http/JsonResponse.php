@@ -3,6 +3,11 @@
 namespace LeafAPI\Http;
 
 
+use LeafAPI\Http\Psr7\Response;
+use LeafAPI\Http\Psr7\Stream;
+
+
+
 class JsonResponse extends Response
 {
 
@@ -13,18 +18,25 @@ class JsonResponse extends Response
     )
     {
 
+
         parent::__construct(
-            json_encode(
-                $data,
-                JSON_PRETTY_PRINT
-            ),
-            $status
+
+            $status,
+
+            new Stream(
+                json_encode(
+                    $data,
+                    JSON_PRETTY_PRINT
+                )
+            )
+
         );
 
 
-        header(
-            'Content-Type: application/json'
-        );
+
+        $this->headers['content-type'] = [
+            'application/json'
+        ];
 
     }
 

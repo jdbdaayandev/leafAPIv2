@@ -2,7 +2,6 @@
 
 namespace LeafAPI\Http;
 
-
 class Response
 {
 
